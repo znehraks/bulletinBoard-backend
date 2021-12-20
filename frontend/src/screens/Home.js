@@ -93,7 +93,7 @@ const MainLeftButton = styled.div`
     margin: 0;
   }
   :hover {
-    background: ${(props) => props.theme.pointColor};
+    background: ${(props) => props.theme.lightHeaderColor};
     color: #fff;
   }
 `;
@@ -110,6 +110,7 @@ const MainRightContainer = styled.div`
   height: 100%;
 `;
 const MainRightContainerTitle = styled.span`
+  margin-top: 1vw;
   width: 80%;
   height: 10%;
   text-align: center;
@@ -137,7 +138,7 @@ const BoardRow = styled.div`
   }
   :hover {
     background-color: ${(props) =>
-      props.isTitle ? "inherit" : props.theme.pointColor};
+      props.isTitle ? "inherit" : props.theme.lightHeaderColor};
     color: ${(props) => (props.isTitle ? "inherit" : "#fff")};
   }
 `;
@@ -213,17 +214,13 @@ const ButtonContainer = styled.div`
   font-size: 1.2vw;
   border: 1px solid rgba(0, 0, 0, 0.5);
   padding: 0.4vw;
-  margin: 1vw 1vw 0 1vw;
-  background-color: ${(props) =>
-    props.type === "complete" && props.theme.lightHeaderColor};
-  color: ${(props) => props.type === "complete" && "#fff"};
+  margin: ${(props) => (props.margin ? props.margin : "1vw 1vw 0 1vw")};
+  background-color: inherit;
+  color: #000;
   cursor: pointer;
   :hover {
-    background-color: ${(props) =>
-      props.type === "complete"
-        ? props.theme.lightHeaderColor
-        : props.theme.pointColor};
-    color: ${(props) => (props.type === "complete" ? "#000" : "#fff")};
+    background-color: ${(props) => props.theme.lightHeaderColor};
+    color: #fff;
   }
 `;
 
@@ -248,11 +245,11 @@ const AddPostButton = styled.div`
   right: 4vw;
   color: #000;
   border: 1px solid rgba(0, 0, 0, 0.5);
-  background-color: ${(props) => props.theme.lightHeaderColor};
-  color: white;
+  background-color: inherit;
+  color: black;
   padding-bottom: 0.4vw;
   :hover {
-    background-color: ${(props) => props.theme.pointColor};
+    background-color: ${(props) => props.theme.lightHeaderColor};
     color: #fff;
   }
   cursor: pointer;
@@ -273,12 +270,15 @@ const GoToBackButton = styled.div`
   color: #000;
   border: 1px solid rgba(0, 0, 0, 0.5);
   :hover {
-    background-color: ${(props) => props.theme.pointColor};
+    background-color: ${(props) => props.theme.lightHeaderColor};
     color: #fff;
   }
   cursor: pointer;
 `;
-
+const PageSpan = styled.span`
+  font-size: 1.2vw;
+  margin-bottom: 1vw;
+`;
 const Footer = styled.div`
   display: flex;
   flex-direction: row;
@@ -313,7 +313,6 @@ const Home = () => {
   const MAIN = "main";
   const EDIT = "edit";
   const CREATE = "create";
-  const CURRENT = "current";
   const isLoggedIn = true;
 
   const [current, setCurrent] = useState({
@@ -326,13 +325,78 @@ const Home = () => {
   });
   const [data, setData] = useState("");
   const [mode, setMode] = useState(MAIN);
+  const [renderToken, setRenderToken] = useState(true);
+  const [page, setPage] = useState(1);
   const titleInput = useInput("");
   const contentInput = useInput("");
+
+  if (titleInput.value.length >= 31) {
+    titleInput.setValue(titleInput.value.slice(0, 30));
+  }
+  if (contentInput.value.length >= 1001) {
+    contentInput.setValue(contentInput.value.slice(0, 1000));
+  }
+  const getAllFunc = async () => {
+    await Api.getAll()
+      .then((res) => {
+        setData(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const createFunc = async (
+    user_code,
+    board_author,
+    board_title,
+    board_content
+  ) => {
+    await Api.createPost(user_code, board_author, board_title, board_content)
+      .then((res) => {
+        console.log(res);
+        if (res.data.affectedRows === 1) setRenderToken(!renderToken);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const editFunc = async (board_code, board_title, board_content) => {
+    await Api.editPost(board_code, board_title, board_content)
+      .then((res) => {
+        console.log(res);
+        if (res.data.affectedRows === 1) {
+          setCurrent({
+            ...current,
+            title: board_title,
+            content: board_content,
+          });
+          setRenderToken(!renderToken);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const deleteFunc = async (board_code) => {
+    await Api.deletePost(board_code)
+      .then((res) => {
+        console.log(res);
+        if (res.data.affectedRows === 1) {
+          setCurrent({ code: -1 });
+          setRenderToken(!renderToken);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   useEffect(() => {
-    Api.getAll().then((res) => {
-      setData(res.data);
-    });
-  }, []);
+    getAllFunc();
+  }, [renderToken]);
+
   return (
     <Wrapper>
       <Nav>
@@ -362,7 +426,15 @@ const Home = () => {
         <MainRightContainer>
           {current.code === -1 && mode === MAIN ? (
             <>
-              <AddPostButton onClick={() => setMode(CREATE)}>+</AddPostButton>
+              <AddPostButton
+                onClick={() => {
+                  setMode(CREATE);
+                  titleInput.setValue("");
+                  contentInput.setValue("");
+                }}
+              >
+                +
+              </AddPostButton>
               <MainRightContainerTitle>게시판 리스트</MainRightContainerTitle>
               <BoardWrapper>
                 <BoardRow isTitle={true}>
@@ -372,27 +444,56 @@ const Home = () => {
                   <BoardCell>작성 시간</BoardCell>
                 </BoardRow>
                 {data &&
-                  data.map((row) => (
-                    <BoardRow
-                      onClick={() => {
-                        setCurrent({
-                          code: row.board_code,
-                          title: row.board_title,
-                          content: row.board_content,
-                          img_url: row.board_img_url,
-                          author: row.board_author,
-                          created_at: row.created_at,
-                        });
-                      }}
-                      key={row.board_code}
-                    >
-                      <BoardCell>{row.board_code}</BoardCell>
-                      <BoardCell>{row.board_title}</BoardCell>
-                      <BoardCell>{row.board_author}</BoardCell>
-                      <BoardCell>{row.created_at.split("T")[0]}</BoardCell>
-                    </BoardRow>
-                  ))}
+                  data.map((row, index) => {
+                    if (index < page * 8 && index >= (page - 1) * 8) {
+                      return (
+                        <BoardRow
+                          onClick={() => {
+                            setCurrent({
+                              code: row.board_code,
+                              title: row.board_title,
+                              content: row.board_content,
+                              img_url: row.board_img_url,
+                              author: row.board_author,
+                              created_at: row.created_at,
+                            });
+                          }}
+                          key={row.board_code}
+                        >
+                          <BoardCell>{row.board_code}</BoardCell>
+                          <BoardCell>{row.board_title}</BoardCell>
+                          <BoardCell>{row.board_author}</BoardCell>
+                          <BoardCell>{row.created_at.split("T")[0]}</BoardCell>
+                        </BoardRow>
+                      );
+                    } else {
+                      return null;
+                    }
+                  })}
               </BoardWrapper>
+              <ButtonBox>
+                <ButtonContainer
+                  margin={"0vw 2vw 1vw 2vw"}
+                  onClick={() =>
+                    page > 1
+                      ? setPage(page - 1)
+                      : alert("첫 번째 페이지 입니다.")
+                  }
+                >
+                  이전
+                </ButtonContainer>
+                <PageSpan>{page}</PageSpan>
+                <ButtonContainer
+                  margin={"0vw 2vw 1vw 2vw"}
+                  onClick={() =>
+                    page < Math.ceil(data.length / 8)
+                      ? setPage(page + 1)
+                      : alert("마지막 페이지 입니다.")
+                  }
+                >
+                  다음
+                </ButtonContainer>
+              </ButtonBox>
             </>
           ) : (
             <>
@@ -406,7 +507,7 @@ const Home = () => {
                   </MainRightContainerTitle>
                   <BoardWrapper>
                     <CurrentTitleContainer>
-                      제목: {current.title}
+                      {current.title}
                     </CurrentTitleContainer>
                     <CurrentContentContainer>
                       {current.content}
@@ -423,7 +524,9 @@ const Home = () => {
                           수정하기
                         </ButtonContainer>
                       )}
-                      <ButtonContainer>삭제하기</ButtonContainer>
+                      <ButtonContainer onClick={() => deleteFunc(current.code)}>
+                        삭제하기
+                      </ButtonContainer>
                     </ButtonBox>
                   </BoardWrapper>
                 </>
@@ -437,16 +540,21 @@ const Home = () => {
               </GoToBackButton>
               <MainRightContainerTitle>내 글 수정하기</MainRightContainerTitle>
               <BoardWrapper>
-                <CurrentTitleContainerEdit type="text" {...titleInput} />
-                <WordCount bottom={"30vw"} right={"16vw"}>
+                <CurrentTitleContainerEdit
+                  type="text"
+                  placeholder="제목을 입력하세요"
+                  {...titleInput}
+                />
+                <WordCount bottom={"29vw"} right={"16vw"}>
                   {titleInput.value.length} / 30
                 </WordCount>
                 <CurrentContentContainerEdit
                   type="textarea"
+                  placeholder="내용을 입력하세요"
                   {...contentInput}
                 />
                 <WordCount bottom={"9vw"} right={"16vw"}>
-                  {contentInput.value.length} / 150
+                  {contentInput.value.length} / 1000
                 </WordCount>
                 <ButtonBox>
                   {isLoggedIn && (
@@ -454,33 +562,55 @@ const Home = () => {
                       수정취소
                     </ButtonContainer>
                   )}
-                  <ButtonContainer type={"complete"}>수정완료</ButtonContainer>
+                  <ButtonContainer
+                    type={"complete"}
+                    onClick={() => {
+                      editFunc(
+                        current.code,
+                        titleInput.value,
+                        contentInput.value
+                      );
+                      setMode(MAIN);
+                    }}
+                  >
+                    수정완료
+                  </ButtonContainer>
                 </ButtonBox>
               </BoardWrapper>
             </>
           )}
           {mode === CREATE && (
             <>
-              <GoToBackButton onClick={() => setCurrent({ code: -1 })}>
-                뒤로가기
-              </GoToBackButton>
               <MainRightContainerTitle>글 작성</MainRightContainerTitle>
               <BoardWrapper>
-                <CurrentTitleContainer>제목:</CurrentTitleContainer>
-                <CurrentContentContainer></CurrentContentContainer>
+                <CurrentTitleContainerEdit
+                  type="text"
+                  placeholder="제목을 입력하세요"
+                  {...titleInput}
+                ></CurrentTitleContainerEdit>
+                <CurrentContentContainerEdit
+                  placeholder="내용을 입력하세요"
+                  {...contentInput}
+                ></CurrentContentContainerEdit>
                 <ButtonBox>
                   {isLoggedIn && (
-                    <ButtonContainer
-                      onClick={() => {
-                        setMode(EDIT);
-                        titleInput.setValue(current.title);
-                        contentInput.setValue(current.content);
-                      }}
-                    >
-                      수정하기
+                    <ButtonContainer onClick={() => setMode(MAIN)}>
+                      취소하기
                     </ButtonContainer>
                   )}
-                  <ButtonContainer>삭제하기</ButtonContainer>
+                  <ButtonContainer
+                    onClick={() => {
+                      createFunc(
+                        1,
+                        "test",
+                        titleInput.value,
+                        contentInput.value
+                      );
+                      setMode(MAIN);
+                    }}
+                  >
+                    완료하기
+                  </ButtonContainer>
                 </ButtonBox>
               </BoardWrapper>
             </>

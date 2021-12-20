@@ -5,4 +5,14 @@ const api = axios.create({
 
 export const Api = {
   getAll: () => api.get(`/`),
+  createPost: (user_code, board_author, board_title, board_content) =>
+    api.post(`/create`, {
+      user_code,
+      board_author,
+      board_title,
+      board_content,
+    }),
+  editPost: (board_code, board_title, board_content) =>
+    api.put(`/update/${board_code}`, { board_title, board_content }),
+  deletePost: (board_code) => api.post(`/delete`, { board_code }),
 };
