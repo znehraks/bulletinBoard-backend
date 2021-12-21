@@ -10,8 +10,8 @@
 
 ### PropTypes 작성
 
-### ContextApI 활용해보기
-
 #### Container/Presenter Pattern 연습하며 분리
 
-#### UI 수정하기
+### ContextApI 활용해보기
+
+#### UI 수정하기(취소버튼 눌렀을 시 팝업 등.)

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Api } from "../api";
-import { Footer } from "../components/screenComponents/Footer";
-import { Header } from "../components/screenComponents/Header";
-import useInput from "../components/hooks/useInput";
-import { LeftContainer } from "../components/screenComponents/LeftContainer";
-import { RightContainer } from "../components/screenComponents/RightContainer";
-import { LOGIN, MAIN } from "../components/screenComponents/Enum";
+import { Api } from "../../api";
+import { Footer } from "../../components/screenComponents/Footer";
+import { Header } from "../../components/screenComponents/Header";
+import useInput from "../../components/hooks/useInput";
+import { LeftContainer } from "../../components/screenComponents/LeftContainer";
+import { RightContainer } from "../../components/screenComponents/RightContainer";
+import { LOGIN, MAIN } from "../../components/screenComponents/Enum";
+
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
