@@ -7,7 +7,7 @@ const App = () => {
   return (
     <>
       <ThemeProvider theme={theme}>
-        <Home></Home>
+        <Home />
       </ThemeProvider>
     </>
   );

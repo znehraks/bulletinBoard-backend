@@ -8,6 +8,10 @@
 
 ### 리펙토링
 
+### PropTypes 작성
+
+### ContextApI 활용해보기
+
 #### Container/Presenter Pattern 연습하며 분리
 
 #### UI 수정하기
