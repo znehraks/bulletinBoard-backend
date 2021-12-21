@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   MainRightContainerTitle,
   BoardWrapper,
@@ -12,10 +12,10 @@ import {
 import { BoardTable } from "../BoardTable";
 import { CREATE, DETAIL } from "../Enum";
 import PropTypes from "prop-types";
+import isLoggedInContext from "../Context";
 
 export const MainMode = ({
   isLoggedIn,
-  me,
   setMode,
   titleInput,
   contentInput,
@@ -24,6 +24,7 @@ export const MainMode = ({
   data,
   setCurrent,
 }) => {
+  const { me } = useContext(isLoggedInContext);
   return (
     <>
       {isLoggedIn && me && (

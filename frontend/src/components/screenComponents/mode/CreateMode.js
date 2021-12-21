@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   MainRightContainerTitle,
   BoardWrapper,
@@ -10,6 +10,7 @@ import {
 } from "../../styles/styledComponents";
 import { MAIN } from "../Enum";
 import PropTypes from "prop-types";
+import isLoggedInContext from "../Context";
 
 export const CreateMode = ({
   titleInput,
@@ -18,8 +19,8 @@ export const CreateMode = ({
   setMode,
   createFunc,
   setPage,
-  me,
 }) => {
+  const { me } = useContext(isLoggedInContext);
   return (
     <>
       <MainRightContainerTitle>글 작성</MainRightContainerTitle>

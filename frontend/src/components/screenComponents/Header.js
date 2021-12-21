@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import styled from "styled-components";
 import Logo_img from "../styles/images/DesignC_logo_03_white.png";
 import Profile_img from "../styles/images/logo.jpg";
 import { LOGIN, MAIN } from "./Enum";
 import PropTypes from "prop-types";
+import isLoggedInContext from "./Context";
 
 const Nav = styled.div`
   width: 100%;
@@ -50,34 +51,35 @@ const LogoImg = styled.img`
   width: 10vw;
   cursor: pointer;
 `;
-export const Header = ({ setMode, isLoggedIn, setIsLoggedIn }) => (
-  <Nav>
-    <Menu onClick={() => setMode(MAIN)}>
-      <LogoImg src={Logo_img} alt={"로고"} />
-    </Menu>
-    <Menu>
-      {!isLoggedIn ? (
-        <AuthButton onClick={() => setMode(LOGIN)}>로그인하기</AuthButton>
-      ) : (
-        <LogoutBox>
-          <ProfileImg src={Profile_img} alt={"프로필이미지"} />
-          <AuthButton
-            onClick={() => {
-              localStorage.removeItem("token");
-              setIsLoggedIn(false);
-              window.location.href = "/";
-            }}
-          >
-            로그아웃하기
-          </AuthButton>
-        </LogoutBox>
-      )}
-    </Menu>
-  </Nav>
-);
+export const Header = ({ setMode }) => {
+  const { isLoggedIn, setIsLoggedIn } = useContext(isLoggedInContext);
+  return (
+    <Nav>
+      <Menu onClick={() => setMode(MAIN)}>
+        <LogoImg src={Logo_img} alt={"로고"} />
+      </Menu>
+      <Menu>
+        {!isLoggedIn ? (
+          <AuthButton onClick={() => setMode(LOGIN)}>로그인하기</AuthButton>
+        ) : (
+          <LogoutBox>
+            <ProfileImg src={Profile_img} alt={"프로필이미지"} />
+            <AuthButton
+              onClick={() => {
+                localStorage.removeItem("token");
+                setIsLoggedIn(false);
+                window.location.href = "/";
+              }}
+            >
+              로그아웃하기
+            </AuthButton>
+          </LogoutBox>
+        )}
+      </Menu>
+    </Nav>
+  );
+};
 
 Header.propTypes = {
   setMode: PropTypes.func.isRequired,
-  isLoggedIn: PropTypes.bool.isRequired,
-  setIsLoggedIn: PropTypes.func.isRequired,
 };

@@ -54,14 +54,12 @@ export const HomePresenter = ({
   getUserFunc,
   loginFunc,
   signupFunc,
+  titleInput,
+  contentInput,
 }) => {
   return (
     <Wrapper>
-      <Header
-        setMode={setMode}
-        isLoggedIn={isLoggedIn}
-        setIsLoggedIn={setIsLoggedIn}
-      />
+      <Header setMode={setMode} />
       <MainContainer>
         <LeftContainer
           mode={mode}
@@ -93,6 +91,8 @@ export const HomePresenter = ({
             passwordInput={passwordInput}
             signupFunc={signupFunc}
             loginFunc={loginFunc}
+            titleInput={titleInput}
+            contentInput={contentInput}
           />
         </MainRightContainer>
       </MainContainer>

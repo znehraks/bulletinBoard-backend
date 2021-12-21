@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import useInput from "../../components/hooks/useInput";
 import { Api } from "../../api";
 import { LOGIN, MAIN } from "../../components/screenComponents/Enum";
 import { HomePresenter } from "./HomePresenter";
+import isLoggedInContext from "../../components/screenComponents/Context";
 
 const HomeContainer = () => {
   const [current, setCurrent] = useState({
@@ -14,12 +15,9 @@ const HomeContainer = () => {
     created_at: "",
     is_mine: false,
   });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, setIsLoggedIn, me, setMe } =
+    useContext(isLoggedInContext);
   const [data, setData] = useState([]);
-  const [me, setMe] = useState({
-    code: "",
-    user_id: "",
-  });
   const [prevMode, setPrevMode] = useState(MAIN);
   const [mode, setMode] = useState(MAIN);
   const [userData, setUserData] = useState([]);
@@ -172,6 +170,8 @@ const HomeContainer = () => {
       setRenderToken={setRenderToken}
       setPage={setPage}
       idInput={idInput}
+      titleInput={titleInput}
+      contentInput={contentInput}
       passwordInput={passwordInput}
       data={data}
       me={me}

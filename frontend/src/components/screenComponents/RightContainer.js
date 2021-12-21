@@ -37,7 +37,6 @@ export const RightContainer = ({
       {mode === MAIN && (
         <MainMode
           isLoggedIn={isLoggedIn}
-          me={me}
           setMode={setMode}
           titleInput={titleInput}
           contentInput={contentInput}
@@ -77,7 +76,6 @@ export const RightContainer = ({
           setMode={setMode}
           createFunc={createFunc}
           setPage={setPage}
-          me={me}
         />
       )}
       {mode === PROFILE && userData.length !== 0 && (
@@ -85,7 +83,6 @@ export const RightContainer = ({
           userData={userData}
           setCurrent={setCurrent}
           setPrevMode={setPrevMode}
-          me={me}
           mode={mode}
           isLoggedIn={isLoggedIn}
           setMode={setMode}
