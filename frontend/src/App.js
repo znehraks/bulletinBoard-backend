@@ -5,11 +5,11 @@ import Home from "./screens/Home";
 
 const App = () => {
   return (
-    <div>
+    <>
       <ThemeProvider theme={theme}>
         <Home></Home>
       </ThemeProvider>
-    </div>
+    </>
   );
 };
 

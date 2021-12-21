@@ -44,7 +44,7 @@ const LogoutBox = styled.div`
   justify-content: center;
   align-items: center;
 `;
-const LogoutButton = styled.span`
+const AuthButton = styled.span`
   cursor: pointer;
 `;
 const ProfileImg = styled.img`
@@ -224,6 +224,59 @@ const ButtonContainer = styled.div`
   }
 `;
 
+const ProfileContainer = styled.div`
+  width: 100%;
+  height: 80%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid ${(props) => props.theme.lightHeaderColor};
+`;
+
+const Profile = styled.img`
+  width: 10vw;
+  height: 10vw;
+  border-radius: 50%;
+  margin: 2vw 0;
+`;
+const ProfileLeftContainer = styled.div`
+  flex: 2;
+  height: 100%;
+  background-color: ${(props) => props.theme.lightHeaderColor};
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-right: 0.1vw;
+  padding-top: 3vw;
+`;
+const ProfileRightContainer = styled.div`
+  flex: 5;
+  height: 95%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 1.2vw;
+  overflow-y: auto;
+`;
+
+const ProfileRightContainerSpan = styled.div`
+  font-size: 1.2vw;
+  color: white;
+`;
+
+const EmptyContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
 const WordCount = styled.span`
   font-size: 1vw;
   font-weight: 600;
@@ -279,6 +332,41 @@ const PageSpan = styled.span`
   font-size: 1.2vw;
   margin-bottom: 1vw;
 `;
+
+const AuthContainer = styled.div`
+  width: 80%;
+  height: 70%;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+const AuthInputContainer = styled.div`
+  width: 35%;
+  height: 8%;
+  margin: 1vw 0;
+  font-size: 1.2vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-right: 2vw;
+`;
+const AuthInputTitle = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  font-size: 1.2vw;
+`;
+const AuthInput = styled.input`
+  flex: 3;
+  height: 100%;
+  font-size: 1.2vw;
+`;
+
 const Footer = styled.div`
   display: flex;
   flex-direction: row;
@@ -309,11 +397,14 @@ const FooterRight = styled.div`
   height: 100%;
   background: ${(props) => props.theme.headerColor};
 `;
+
 const Home = () => {
   const MAIN = "main";
   const EDIT = "edit";
   const CREATE = "create";
-  const isLoggedIn = true;
+  const PROFILE = "profile";
+  const SIGNUP = "signup";
+  const LOGIN = "login";
 
   const [current, setCurrent] = useState({
     code: -1,
@@ -322,13 +413,24 @@ const Home = () => {
     img_url: "",
     author: "",
     created_at: "",
+    is_mine: false,
   });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [data, setData] = useState("");
+  const [me, setMe] = useState({
+    code: "",
+    user_id: "",
+  });
+  const [prevMode, setPrevMode] = useState(MAIN);
   const [mode, setMode] = useState(MAIN);
+  const [userData, setUserData] = useState("");
   const [renderToken, setRenderToken] = useState(true);
   const [page, setPage] = useState(1);
   const titleInput = useInput("");
   const contentInput = useInput("");
+  const nameInput = useInput("");
+  const idInput = useInput("");
+  const passwordInput = useInput("");
 
   if (titleInput.value.length >= 31) {
     titleInput.setValue(titleInput.value.slice(0, 30));
@@ -336,6 +438,11 @@ const Home = () => {
   if (contentInput.value.length >= 1001) {
     contentInput.setValue(contentInput.value.slice(0, 1000));
   }
+  //onClick 함수 정리
+  //UI 어색한 부분 수정
+  //컴포넌트 분리
+  //디자인패턴 적용
+
   const getAllFunc = async () => {
     await Api.getAll()
       .then((res) => {
@@ -372,6 +479,8 @@ const Home = () => {
             title: board_title,
             content: board_content,
           });
+          setCurrent({ code: -1 });
+          setMode(prevMode);
           setRenderToken(!renderToken);
         }
       })
@@ -393,6 +502,58 @@ const Home = () => {
         console.log(err);
       });
   };
+
+  const getUserFunc = async () => {
+    await Api.getUser()
+      .then((res) => {
+        if (res.data.success === false) return;
+        console.log(res);
+        setUserData(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const getMeFunc = async () => {
+    await Api.getMe()
+      .then((res) => {
+        if (res.data.success === false) return;
+        setMe({ code: res.data.code, user_id: res.data.user_id });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const loginFunc = async (user_id, user_password) => {
+    await Api.login(user_id, user_password)
+      .then((res) => {
+        const {
+          data: { token },
+        } = res;
+        if (token) {
+          localStorage.setItem("token", token);
+          getMeFunc();
+          idInput.setValue("");
+          passwordInput.setValue("");
+          setIsLoggedIn(true);
+          setMode(MAIN);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+  const signupFunc = async (user_name, user_id, user_password) => {
+    await Api.signUp(user_name, user_id, user_password)
+      .then((res) => {
+        console.log(res);
+        alert("회원가입 성공!");
+        idInput.setValue(user_id);
+        passwordInput.setValue(user_password);
+        setMode(LOGIN);
+      })
+      .catch((err) => console.log(err));
+  };
   useEffect(() => {
     getAllFunc();
   }, [renderToken]);
@@ -400,41 +561,71 @@ const Home = () => {
   return (
     <Wrapper>
       <Nav>
-        <Menu>
+        <Menu onClick={() => setMode(MAIN)}>
           <LogoImg src={Logo_img} alt={"로고"} />
         </Menu>
         <Menu>
           {!isLoggedIn ? (
-            "로그인"
+            <AuthButton onClick={() => setMode(LOGIN)}>로그인하기</AuthButton>
           ) : (
             <LogoutBox>
               <ProfileImg src={Profile_img} alt={"프로필이미지"} />
-              <LogoutButton>로그아웃</LogoutButton>
+              <AuthButton
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  setIsLoggedIn(false);
+                  window.location.href = "/";
+                }}
+              >
+                로그아웃하기
+              </AuthButton>
             </LogoutBox>
           )}
         </Menu>
       </Nav>
       <MainContainer>
         <MainLeftContainer>
-          <MainLeftButton>
+          <MainLeftButton
+            onClick={() => {
+              if (isLoggedIn) {
+                setPrevMode(mode);
+                setMode(PROFILE);
+                getUserFunc();
+              } else {
+                setMode(LOGIN);
+              }
+            }}
+          >
             <ButtonImg src={MyProfile_img} />내 프로필 보기
           </MainLeftButton>
-          <MainLeftButton>
+          <MainLeftButton
+            onClick={() => {
+              if (isLoggedIn) {
+                setPrevMode(mode);
+                setMode(PROFILE);
+                getUserFunc();
+              } else {
+                setMode(LOGIN);
+              }
+            }}
+          >
             <ButtonImg src={MyPost_img} />내 게시글 보기
           </MainLeftButton>
         </MainLeftContainer>
         <MainRightContainer>
           {current.code === -1 && mode === MAIN ? (
             <>
-              <AddPostButton
-                onClick={() => {
-                  setMode(CREATE);
-                  titleInput.setValue("");
-                  contentInput.setValue("");
-                }}
-              >
-                +
-              </AddPostButton>
+              {isLoggedIn && me && (
+                <AddPostButton
+                  onClick={() => {
+                    setMode(CREATE);
+                    titleInput.setValue("");
+                    contentInput.setValue("");
+                  }}
+                >
+                  +
+                </AddPostButton>
+              )}
               <MainRightContainerTitle>게시판 리스트</MainRightContainerTitle>
               <BoardWrapper>
                 <BoardRow isTitle={true}>
@@ -456,6 +647,7 @@ const Home = () => {
                               img_url: row.board_img_url,
                               author: row.board_author,
                               created_at: row.created_at,
+                              is_mine: row.user_code === me.code,
                             });
                           }}
                           key={row.board_code}
@@ -499,7 +691,12 @@ const Home = () => {
             <>
               {mode === MAIN && (
                 <>
-                  <GoToBackButton onClick={() => setCurrent({ code: -1 })}>
+                  <GoToBackButton
+                    onClick={() => {
+                      setCurrent({ code: -1 });
+                      setMode(prevMode);
+                    }}
+                  >
                     뒤로가기
                   </GoToBackButton>
                   <MainRightContainerTitle>
@@ -512,8 +709,8 @@ const Home = () => {
                     <CurrentContentContainer>
                       {current.content}
                     </CurrentContentContainer>
-                    <ButtonBox>
-                      {isLoggedIn && (
+                    {isLoggedIn && current.is_mine && (
+                      <ButtonBox>
                         <ButtonContainer
                           onClick={() => {
                             setMode(EDIT);
@@ -523,17 +720,19 @@ const Home = () => {
                         >
                           수정하기
                         </ButtonContainer>
-                      )}
-                      <ButtonContainer onClick={() => deleteFunc(current.code)}>
-                        삭제하기
-                      </ButtonContainer>
-                    </ButtonBox>
+                        <ButtonContainer
+                          onClick={() => deleteFunc(current.code)}
+                        >
+                          삭제하기
+                        </ButtonContainer>
+                      </ButtonBox>
+                    )}
                   </BoardWrapper>
                 </>
               )}
             </>
           )}
-          {mode === EDIT && (
+          {mode === EDIT && current.code !== -1 && (
             <>
               <GoToBackButton onClick={() => setCurrent({ code: -1 })}>
                 뒤로가기
@@ -601,11 +800,12 @@ const Home = () => {
                   <ButtonContainer
                     onClick={() => {
                       createFunc(
-                        1,
-                        "test",
+                        me.code,
+                        me.user_id,
                         titleInput.value,
                         contentInput.value
                       );
+                      setPage(1);
                       setMode(MAIN);
                     }}
                   >
@@ -615,11 +815,145 @@ const Home = () => {
               </BoardWrapper>
             </>
           )}
+          {mode === PROFILE && userData.length !== 0 && (
+            <>
+              <MainRightContainerTitle>
+                '{userData[0].user_name}'의 프로필과 게시글을 확인할 수 있어요
+              </MainRightContainerTitle>
+              <BoardWrapper>
+                <ProfileContainer>
+                  <ProfileLeftContainer>
+                    <Profile src={Profile_img} />
+                    <ProfileRightContainerSpan></ProfileRightContainerSpan>
+                    <ProfileRightContainerSpan>
+                      {userData[0].user_name}({userData[0].user_id})
+                    </ProfileRightContainerSpan>
+                  </ProfileLeftContainer>
+                  <ProfileRightContainer>
+                    {userData.map((row) => {
+                      if (row.board_code) {
+                        return (
+                          <BoardRow
+                            onClick={() => {
+                              setCurrent({
+                                code: row.board_code,
+                                title: row.board_title,
+                                content: row.board_content,
+                                img_url: row.board_img_url,
+                                author: row.board_author,
+                                created_at: row.created_at,
+                                is_mine: row.user_code === me.code,
+                              });
+                              setPrevMode(mode);
+                              setMode(MAIN);
+                            }}
+                            key={row.board_code}
+                          >
+                            <BoardCell>{row.board_code}</BoardCell>
+                            <BoardCell>{row.board_title}</BoardCell>
+                            <BoardCell>{row.board_author}</BoardCell>
+                            <BoardCell>
+                              {row.created_at.split("T")[0]}
+                            </BoardCell>
+                          </BoardRow>
+                        );
+                      } else {
+                        return (
+                          <EmptyContainer>아직 게시글이 없어요.</EmptyContainer>
+                        );
+                      }
+                    })}
+                  </ProfileRightContainer>
+                </ProfileContainer>
+                <ButtonBox>
+                  {isLoggedIn && (
+                    <ButtonContainer onClick={() => setMode(MAIN)}>
+                      뒤로가기
+                    </ButtonContainer>
+                  )}
+                </ButtonBox>
+              </BoardWrapper>
+            </>
+          )}
+          {mode === SIGNUP && (
+            <AuthContainer>
+              <AuthInputContainer>
+                <AuthInputTitle>이름:</AuthInputTitle>
+                <AuthInput type="text" placeholder="이름 입력" {...nameInput} />
+              </AuthInputContainer>
+              <AuthInputContainer>
+                <AuthInputTitle>아이디:</AuthInputTitle>
+                <AuthInput type="text" placeholder="아이디 입력" {...idInput} />
+              </AuthInputContainer>
+              <AuthInputContainer>
+                <AuthInputTitle>비밀번호:</AuthInputTitle>
+                <AuthInput
+                  type="password"
+                  placeholder="비밀번호 입력"
+                  {...passwordInput}
+                />
+              </AuthInputContainer>
+              <ButtonBox>
+                <ButtonContainer
+                  onClick={() => {
+                    signupFunc(
+                      nameInput.value,
+                      idInput.value,
+                      passwordInput.value
+                    );
+                  }}
+                >
+                  완료
+                </ButtonContainer>
+                <ButtonContainer
+                  onClick={() => {
+                    setMode(LOGIN);
+                  }}
+                >
+                  로그인하기
+                </ButtonContainer>
+              </ButtonBox>
+            </AuthContainer>
+          )}
+          {mode === LOGIN && (
+            <AuthContainer>
+              <AuthInputContainer>
+                <AuthInputTitle>아이디:</AuthInputTitle>
+                <AuthInput type="text" placeholder="아이디 입력" {...idInput} />
+              </AuthInputContainer>
+              <AuthInputContainer>
+                <AuthInputTitle>비밀번호:</AuthInputTitle>
+                <AuthInput
+                  type="password"
+                  placeholder="비밀번호 입력"
+                  {...passwordInput}
+                />
+              </AuthInputContainer>
+              <ButtonBox>
+                <ButtonContainer
+                  onClick={() => {
+                    loginFunc(idInput.value, passwordInput.value);
+                  }}
+                >
+                  로그인
+                </ButtonContainer>
+                <ButtonContainer
+                  onClick={() => {
+                    setMode(SIGNUP);
+                  }}
+                >
+                  회원가입
+                </ButtonContainer>
+              </ButtonBox>
+            </AuthContainer>
+          )}
         </MainRightContainer>
       </MainContainer>
       <Footer>
-        <FooterLeft>만든이: 유정민</FooterLeft>
-        <FooterRight>개발자 링크: github</FooterRight>
+        <FooterLeft>만든이: 유정민(DesignC)</FooterLeft>
+        <FooterRight>
+          링크: https://github.com/znehraks?tab=repositories
+        </FooterRight>
       </Footer>
     </Wrapper>
   );
