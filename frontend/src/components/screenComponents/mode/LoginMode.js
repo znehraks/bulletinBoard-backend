@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   ButtonBox,
   ButtonContainer,
@@ -11,18 +11,39 @@ import { SIGNUP } from "../Enum";
 import PropTypes from "prop-types";
 
 export const LoginMode = ({ idInput, passwordInput, loginFunc, setMode }) => {
+  const idRef = useRef();
+  const passwordRef = useRef();
+  useEffect(() => {
+    idRef.current.focus();
+  }, []);
   return (
     <AuthContainer>
       <AuthInputContainer>
         <AuthInputTitle>아이디:</AuthInputTitle>
-        <AuthInput type="text" placeholder="아이디 입력" {...idInput} />
+        <AuthInput
+          ref={idRef}
+          type="text"
+          placeholder="아이디 입력"
+          {...idInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              passwordRef.current.focus();
+            }
+          }}
+        />
       </AuthInputContainer>
       <AuthInputContainer>
         <AuthInputTitle>비밀번호:</AuthInputTitle>
         <AuthInput
+          ref={passwordRef}
           type="password"
           placeholder="비밀번호 입력"
           {...passwordInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              loginFunc(idInput.value, passwordInput.value);
+            }
+          }}
         />
       </AuthInputContainer>
       <ButtonBox>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   MainRightContainerTitle,
   BoardWrapper,
@@ -18,22 +18,40 @@ export const EditMode = ({
   editFunc,
   current,
 }) => {
+  const titleRef = useRef();
+  const contentRef = useRef();
+  useEffect(() => {
+    titleRef.current.focus();
+  }, []);
   return (
     <>
       <MainRightContainerTitle>내 글 수정하기</MainRightContainerTitle>
       <BoardWrapper>
         <CurrentTitleContainerEdit
+          ref={titleRef}
           type="text"
           placeholder="제목을 입력하세요"
           {...titleInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              contentRef.current.focus();
+            }
+          }}
         />
         <WordCount bottom={"29.5vw"} right={"16vw"}>
           {titleInput.value.length} / 30
         </WordCount>
         <CurrentContentContainerEdit
+          ref={contentRef}
           type="textarea"
           placeholder="내용을 입력하세요"
           {...contentInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              editFunc(current.code, titleInput.value, contentInput.value);
+              setMode(MAIN);
+            }
+          }}
         />
         <WordCount bottom={"8vw"} right={"16vw"}>
           {contentInput.value.length} / 1000

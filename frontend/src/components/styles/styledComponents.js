@@ -213,7 +213,8 @@ export const ButtonContainer = styled.div`
   color: #000;
   cursor: pointer;
   :hover {
-    background-color: ${(props) => props.theme.lightHeaderColor};
+    background-color: ${(props) =>
+      props.bgColor ? props.bgColor : props.theme.lightHeaderColor};
     color: #fff;
   }
 `;

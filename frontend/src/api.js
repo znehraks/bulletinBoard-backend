@@ -4,10 +4,10 @@ const api = axios.create({
 });
 
 export const Api = {
-  getAll: () => api.get(`/`),
+  getAll: () => api.get(`/post`),
   createPost: (user_code, board_author, board_title, board_content) =>
     api.post(
-      `/create`,
+      `/post/create`,
       {
         user_code,
         board_author,
@@ -18,13 +18,13 @@ export const Api = {
     ),
   editPost: (board_code, board_title, board_content) =>
     api.put(
-      `/update/${board_code}`,
+      `/post/update/${board_code}`,
       { board_title, board_content },
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     ),
   deletePost: (board_code) =>
     api.post(
-      `/delete`,
+      `/post/delete`,
       { board_code },
       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     ),

@@ -59,7 +59,10 @@ const HomeContainer = () => {
     await Api.createPost(user_code, board_author, board_title, board_content)
       .then((res) => {
         console.log(res);
-        if (res.data.affectedRows === 1) setRenderToken(!renderToken);
+        if (res.data.affectedRows === 1) {
+          alert("작성이 완료되었습니다.");
+          setRenderToken(!renderToken);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -71,6 +74,7 @@ const HomeContainer = () => {
       .then((res) => {
         console.log(res);
         if (res.data.affectedRows === 1) {
+          alert("수정이 완료되었습니다.");
           setCurrent({
             ...current,
             title: board_title,
@@ -92,7 +96,9 @@ const HomeContainer = () => {
         console.log(res);
         if (res.data.affectedRows === 1) {
           setCurrent({ code: -1 });
+          setMode(MAIN);
           setRenderToken(!renderToken);
+          alert("삭제되었습니다.");
         }
       })
       .catch((err) => {
@@ -126,6 +132,9 @@ const HomeContainer = () => {
   const loginFunc = async (user_id, user_password) => {
     await Api.login(user_id, user_password)
       .then((res) => {
+        if (res.data.success === false) {
+          alert(res.data.err_msg);
+        }
         const {
           data: { token },
         } = res;
@@ -136,6 +145,7 @@ const HomeContainer = () => {
           passwordInput.setValue("");
           setIsLoggedIn(true);
           setMode(MAIN);
+          alert("로그인 되었습니다.");
         }
       })
       .catch((err) => console.log(err));
@@ -153,7 +163,10 @@ const HomeContainer = () => {
   };
   useEffect(() => {
     getAllFunc();
-  }, [renderToken]);
+    if (!me.code) {
+      setIsLoggedIn(false);
+    }
+  }, [renderToken, me.code, setIsLoggedIn]);
 
   return (
     <HomePresenter

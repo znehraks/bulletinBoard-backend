@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   ButtonBox,
   ButtonContainer,
@@ -16,22 +16,54 @@ export const SignupMode = ({
   signupFunc,
   setMode,
 }) => {
+  const nameRef = useRef();
+  const idRef = useRef();
+  const passwordRef = useRef();
+  useEffect(() => {
+    nameRef.current.focus();
+  }, []);
   return (
     <AuthContainer>
       <AuthInputContainer>
         <AuthInputTitle>이름:</AuthInputTitle>
-        <AuthInput type="text" placeholder="이름 입력" {...nameInput} />
+        <AuthInput
+          ref={nameRef}
+          type="text"
+          placeholder="이름 입력"
+          {...nameInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              idRef.current.focus();
+            }
+          }}
+        />
       </AuthInputContainer>
       <AuthInputContainer>
         <AuthInputTitle>아이디:</AuthInputTitle>
-        <AuthInput type="text" placeholder="아이디 입력" {...idInput} />
+        <AuthInput
+          ref={idRef}
+          type="text"
+          placeholder="아이디 입력"
+          {...idInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              passwordRef.current.focus();
+            }
+          }}
+        />
       </AuthInputContainer>
       <AuthInputContainer>
         <AuthInputTitle>비밀번호:</AuthInputTitle>
         <AuthInput
+          ref={passwordRef}
           type="password"
           placeholder="비밀번호 입력"
           {...passwordInput}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              signupFunc(nameInput.value, idInput.value, passwordInput.value);
+            }
+          }}
         />
       </AuthInputContainer>
       <ButtonBox>

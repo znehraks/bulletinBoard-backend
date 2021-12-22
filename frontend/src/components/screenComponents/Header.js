@@ -68,6 +68,7 @@ export const Header = ({ setMode }) => {
               onClick={() => {
                 localStorage.removeItem("token");
                 setIsLoggedIn(false);
+                alert("로그아웃 되었습니다.");
                 window.location.href = "/";
               }}
             >
