@@ -8,19 +8,12 @@ const morgan = require("morgan");
 const path = require("path");
 const rfs = require("rotating-file-stream");
 
-app.use(cors());
-// "Origin, X-Requested-With, Content-Type, Accept"
-app.use(function (req, res, next) {
-  res.header(
-    "Access-Control-Allow-Origin",
-    "https://bulletinboard-designc.netlify.app/"
-  );
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+const corsOptions = {
+  origin: "https://bulletinboard-designc.netlify.app",
+  // origin: "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 // const accessLogStream = rfs.createStream("access.log", {
 //   interval: "1d",
