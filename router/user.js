@@ -36,6 +36,7 @@ router.post("/login", parser, async (req, res) => {
   const sql = `SELECT * FROM user WHERE user_id = '${req.body.user_id}'`;
   connection.query(sql, (err, data) => {
     if (err) {
+      console.log(err);
       res.send({
         success: false,
         err_code: -1,
@@ -55,6 +56,7 @@ router.post("/login", parser, async (req, res) => {
       data[0].user_password,
       (err, compareRes) => {
         if (err) {
+          console.log(err);
           res.send({
             success: false,
             err_code: -1,
@@ -83,7 +85,8 @@ router.get("/me", (req, res) => {
   try {
     const user = authenticateJWT(req.headers.authorization);
     res.send(user);
-  } catch (e) {
+  } catch (err) {
+    console.log(err);
     res.send({ success: false });
   }
 });
