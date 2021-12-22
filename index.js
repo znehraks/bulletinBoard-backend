@@ -24,11 +24,11 @@ app.use(function (req, res, next) {
   next();
 });
 
-const accessLogStream = rfs.createStream("access.log", {
-  interval: "1d",
-  path: path.join(__dirname, "log"),
-});
-app.use(morgan("combined", { stream: accessLogStream }));
+// const accessLogStream = rfs.createStream("access.log", {
+//   interval: "1d",
+//   path: path.join(__dirname, "log"),
+// });
+// app.use(morgan("combined", { stream: accessLogStream }));
 
 app.use("/user", userRouter);
 app.use("/post", postRouter);
