@@ -9,8 +9,8 @@ const path = require("path");
 const rfs = require("rotating-file-stream");
 
 const corsOptions = {
-  // origin: "https://bulletinboard-designc.netlify.app",
-  origin: "http://localhost:3000",
+  origin: "https://bulletinboard-designc.netlify.app",
+  // origin: "http://localhost:3000",
   credentials: true,
 };
 app.use(cors(corsOptions));
