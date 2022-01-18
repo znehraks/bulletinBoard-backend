@@ -2,18 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const postRouter = require("./router/post");
-const userRouter = require("./router/user");
-const morgan = require("morgan");
-const path = require("path");
-const rfs = require("rotating-file-stream");
-
-const corsOptions = {
-  origin: "https://bulletinboard-designc.netlify.app",
-  // origin: "http://localhost:3000",
-  credentials: true,
-};
-app.use(cors(corsOptions));
+const { sequelize } = require("./database/models");
+const router = require("./router");
+// const morgan = require("morgan");
+// const path = require("path");
+// const rfs = require("rotating-file-stream");
 
 // const accessLogStream = rfs.createStream("access.log", {
 //   interval: "1d",
@@ -21,8 +14,26 @@ app.use(cors(corsOptions));
 // });
 // app.use(morgan("combined", { stream: accessLogStream }));
 
-app.use("/user", userRouter);
-app.use("/post", postRouter);
+//CORS
+const corsOptions = {
+  // origin: "https://bulletinboard-designc.netlify.app",
+  // origin: "http://192.168.45.129:3000",
+  origin: "*",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    console.log("데이터베이스 연결됨.");
+  })
+  .catch((err) => {
+    console.error(err);
+  });
+
+app.use("/", router);
 
 app.listen(process.env.PORT, () => {
   console.log(`listening on port ${process.env.PORT}`);

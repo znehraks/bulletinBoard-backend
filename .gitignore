@@ -26,3 +26,15 @@ yarn-error.log*
 .env
 
 /log
+
+/config
+
+/database/config
+/database/config/config.json
+
+/database/log
+/database/log/access.log
+
+/database/migrations
+
+/database/seeders
